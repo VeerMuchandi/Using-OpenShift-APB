@@ -101,4 +101,4 @@
       DB_PORT: '{{ mssql_port }}'
       DB_USER: "{{ mssql_user }}"
       DB_PASSWORD: "{{ mssql_password }}"
-      DB_NAME: "{{ mysql_database }}"
+      DB_NAME: "{{ mssql_database }}"

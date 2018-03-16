@@ -26,16 +26,16 @@ plans:
         title: MSSQL Admin User
         type: string
         default: SA 
-      - name: mysql_admin_password
+      - name: mssql_admin_password
         title: MSSQL Admin Password
         type: string
       - name: mssql_user
         title: Database user to be added to connect in the future 
         type: string
-        default: user
-      - name: mysql_password
+        default: mssqluser
+      - name: mssql_password
         title: Password for the database user being added
-        default: password 
+        default: MSSQLPassword1
         type: string
       - name: postinstall_mssql_script
         title: URL of the script to run after database creation
