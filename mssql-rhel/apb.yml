@@ -1,42 +1,65 @@
 version: 1.0
-name: mssql-rhel-apb
-description: Microsoft SQL Server on RHEL                       
+name: mssql-apb
+description: Microsoft SQL Server Remote APB 
 bindable: True
 async: optional
 metadata:
-  displayName: mssql-rhel
+  displayName: "MS SQL Server - Remote"
+  imageUrl: https://raw.githubusercontent.com/VeerMuchandi/Using-OpenShift-APB/master/mssql-rhel/SQL-Server.png
+  longDescription: "An Ansible Playbook Bundle (APB) that deploys a database on an existing MS SQL Server configured for contained databases"
+  providerDisplayName: "Red Hat, Inc." 
 plans:
   - name: default
-    description: This plan deploys a database on the development version of MS SQLServer. This MS SQLServer instance should have been configured to support contained databases as explained here https://www.mssqltips.com/sqlservertip/2428/sql-server-2012-contained-database-feature/
+    description: This plan deploys a database on your own instance of MS SQLServer. Use this APB when you want to provision a database on your own database server.  You will supply connection information to your database in the next step. Your MS SQLServer should have been configured to support contained databases as explained here https://www.mssqltips.com/sqlservertip/2428/sql-server-2012-contained-database-feature/
     free: True
-    metadata: {}
+    metadata: 
+      displayName: MS SQL Server
+      longDescription: Provide your server connection information, and the database and user to add. Refer Password Policies https://docs.microsoft.com/en-us/sql/relational-databases/security/password-policy#password-complexity
     parameters:
       - name: mssql_database
         title: Name of the database to be provisioned 
         type: string
         default: sampledb
+        pattern: "^[a-zA-Z_][a-zA-Z0-9_]*$"
+        required: true
       - name: mssql_host
         title: Host running MS SQL Server 
         type: string
+        required: true
       - name: mssql_port
         title: Port MS SQL Server is exposed on
         type: int 
         default: 1433 
+        required: true
       - name: mssql_admin_user
         title: MSSQL Admin User
         type: string
         default: SA 
+        required: true
+        maxlength: 128
       - name: mssql_admin_password
         title: MSSQL Admin Password
         type: string
+        required: true
+        display_type: password
+        maxlength: 128
+        pattern: "^[a-zA-Z0-9_~!@#$%^&*()-=<>,.?;:|]+$"
       - name: mssql_user
         title: Database user to be added to connect in the future 
         type: string
         default: mssqluser
+        required: true
+        maxlength: 128
       - name: mssql_password
         title: Password for the database user being added
         default: MSSQLPassword1
+        display_type: password
         type: string
+        required: true
+        minlength: 8   
+        maxlength: 128
+        pattern: "^[a-zA-Z0-9_~!@#$%^&*()-=<>,.?;:|]+$"
       - name: postinstall_mssql_script
-        title: URL of the script to run after database creation
+        title: URL of the script to run after database creation (optional)
         type: string
+        required: false
