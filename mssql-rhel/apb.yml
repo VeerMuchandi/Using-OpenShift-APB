@@ -1,0 +1,42 @@
+version: 1.0
+name: mssql-rhel-apb
+description: Microsoft SQL Server on RHEL                       
+bindable: True
+async: optional
+metadata:
+  displayName: mssql-rhel
+plans:
+  - name: default
+    description: This plan deploys a database on the development version of MS SQLServer. This MS SQLServer instance should have been configured to support contained databases as explained here https://www.mssqltips.com/sqlservertip/2428/sql-server-2012-contained-database-feature/
+    free: True
+    metadata: {}
+    parameters:
+      - name: mssql_database
+        title: Name of the database to be provisioned 
+        type: string
+        default: sampledb
+      - name: mssql_host
+        title: Host running MS SQL Server 
+        type: string
+      - name: mssql_port
+        title: Port MS SQL Server is exposed on
+        type: int 
+        default: 1433 
+      - name: mssql_admin_user
+        title: MSSQL Admin User
+        type: string
+        default: SA 
+      - name: mysql_admin_password
+        title: MSSQL Admin Password
+        type: string
+      - name: mssql_user
+        title: Database user to be added to connect in the future 
+        type: string
+        default: user
+      - name: mysql_password
+        title: Password for the database user being added
+        default: password 
+        type: string
+      - name: postinstall_mssql_script
+        title: URL of the script to run after database creation
+        type: string

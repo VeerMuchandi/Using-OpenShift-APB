@@ -1,0 +1,104 @@
+##############################################################################
+## Provision mssql-rhel
+## This role executes much of the needed functionality to provision an
+## application using an Ansible Playbook Bundle.  Included in the comments
+## below are some sample resources for getting started deploying an application
+## to OpenShift.
+##############################################################################
+
+#########################################################################################
+# Create a database on MS SQL Server. 
+# MS SQL Server should have been set to accept contained databases
+# Let's alter the database to contained so that we can create user with password
+# Since ansible does not provide this yet, we are running it as ALTER script 
+#########################################################################################
+- name: Create a database on MS SQL Server
+  mssql_db:
+    login_host: '{{ mssql_host }}' 
+    login_port: '{{ mssql_port }}' 
+    login_user: '{{ mssql_admin_user }}' 
+    login_password: '{{ mssql_admin_password }}' 
+    name: '{{ mssql_database }}' 
+    state: present
+
+- copy:
+    content: |
+      ALTER DATABASE {{ mssql_database }} SET CONTAINMENT = PARTIAL
+    dest: /opt/apb/actions/containeddb.sql
+
+- name: Make this a Contained Database 
+  mssql_db:
+    login_host: '{{ mssql_host }}'
+    login_port: '{{ mssql_port }}'
+    login_user: '{{ mssql_admin_user }}'
+    login_password: '{{ mssql_admin_password }}'
+    name: '{{ mssql_database }}'
+    state: import
+    target: /opt/apb/actions/containeddb.sql
+    autocommit: true
+
+##############################################################################
+# Add a User with Password and make that user the dbowner
+##############################################################################
+
+- copy:
+    content: |
+      CREATE USER {{ mssql_user }} WITH PASSWORD='{{ mssql_password }}'
+      USE {{ mssql_database }} 
+      ALTER ROLE db_owner ADD MEMBER {{ mssql_user }} 
+    dest: /opt/apb/actions/adduser.sql
+
+- name: Add User with Password          
+  mssql_db:
+    login_host: '{{ mssql_host }}'
+    login_port: '{{ mssql_port }}'
+    login_user: '{{ mssql_admin_user }}'
+    login_password: '{{ mssql_admin_password }}'
+    name: '{{ mssql_database }}'
+    state: import
+    target: /opt/apb/actions/adduser.sql
+    autocommit: true
+
+
+##############################################################################
+# Download and run a Post Install SQL Script if provided
+##############################################################################
+
+- name: Download Post Install Script
+  get_url:
+    url: '{{ postinstall_mssql_script }}'
+    dest: /opt/apb/actions/script.sql
+  when: postinstall_mssql_script is defined
+
+- stat:
+    path: /opt/apb/actions/script.sql
+  register: stat_result
+
+- name: Running Post Install Script
+  mssql_db:
+    login_host: '{{ mssql_host }}'
+    login_port: '{{ mssql_port }}'
+    login_user: '{{ mssql_admin_user }}'
+    login_password: '{{ mssql_admin_password }}'
+    name: '{{ mssql_database }}'
+    state: import
+    target: /opt/apb/actions/script.sql
+  when: stat_result.stat.exists ==True
+
+
+##############################################################################
+# When you create binding, the credentials listed below will be 
+# made available in the secret
+# You won't provide admin credentials as part of this list to the application
+# only the newly added database and its user
+##############################################################################
+
+- name: encode bind credentials
+  asb_encode_binding:
+    fields:
+      DB_TYPE: mssql 
+      DB_HOST: '{{ mssql_host }}'
+      DB_PORT: '{{ mssql_port }}'
+      DB_USER: "{{ mssql_user }}"
+      DB_PASSWORD: "{{ mssql_password }}"
+      DB_NAME: "{{ mysql_database }}"
