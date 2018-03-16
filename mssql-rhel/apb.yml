@@ -1,5 +1,5 @@
 version: 1.0
-name: mssql-apb
+name: mssql-remote-apb
 description: Microsoft SQL Server Remote APB 
 bindable: True
 async: optional
@@ -54,6 +54,7 @@ plans:
         title: Password for the database user being added
         default: MSSQLPassword1
         display_type: password
+        description: "As per SQL Server password policy, the password must be atleast 8 characters long and contain characters from three of the following four sets: Uppercase letters, Lowercase letters, Base 10 digits, and Symbols."
         type: string
         required: true
         minlength: 8   
